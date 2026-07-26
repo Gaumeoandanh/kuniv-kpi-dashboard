@@ -1,0 +1,8 @@
+{
+  "totalMembers": 55,
+  "activeMembers": 55,
+  "newMembersThisMonth": 26,
+  "churnedMembers": 0,
+  "fetchedAt": "2026-07-26T00:00:00.000Z",
+  "note": "Pulled manually from K-UNIV admin dashboard (read-only, no credentials stored). Ask Claude to refresh this snapshot when you need updated numbers — see lib/data/kuniv.ts."
+}
