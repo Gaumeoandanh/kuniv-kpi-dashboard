@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   if (isRateLimited(ip)) {
     return NextResponse.json(
-      { error: "Quá nhiều lần thử. Vui lòng thử lại sau." },
+      { error: "시도 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요." },
       { status: 429 }
     );
   }
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   const storedHash = process.env.DASHBOARD_PASSWORD_HASH;
   if (!storedHash) {
     return NextResponse.json(
-      { error: "Server chưa cấu hình mật khẩu (DASHBOARD_PASSWORD_HASH)." },
+      { error: "서버에 비밀번호가 설정되어 있지 않습니다 (DASHBOARD_PASSWORD_HASH)." },
       { status: 500 }
     );
   }
@@ -45,12 +45,12 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const password = body?.password;
   if (typeof password !== "string" || password.length === 0) {
-    return NextResponse.json({ error: "Thiếu mật khẩu." }, { status: 400 });
+        return NextResponse.json({ error: "비밀번호를 입력해 주세요." }, { status: 400 });
   }
 
   const ok = verifyPassword(password, storedHash);
   if (!ok) {
-    return NextResponse.json({ error: "Sai mật khẩu." }, { status: 401 });
+        return NextResponse.json({ error: "비밀번호가 올바르지 않습니다." }, { status: 401 });
   }
 
   const token = await createSessionToken();
