@@ -39,7 +39,7 @@ export default function UserSection({ stats }: { stats: UserStats }) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <SummaryCard label="전체 회원" value={stats.totalMembers} sub={`활성 ${stats.activeMembers}명`} accent="brand" icon="👥" />
         <SummaryCard label="이번 달 신규 회원" value={`+${stats.newMembersThisMonth}`} sub="최근 30일 가입" accent="violet" icon="🌱" />
         <SummaryCard label="탈퇴" value={stats.churnedMembers} sub="누적" accent="rose" icon="👋" />
