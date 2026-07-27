@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import CatIcon from "@/components/CatIcon";
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -17,9 +16,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-2">
-            <CatIcon className="h-8 w-8" />
+                        <img src="/k-univ-logo.png" alt="K-UNIV" className="h-7 w-auto" />
             <span className="font-semibold text-slate-800">
-              K-UNIV <span className="text-brand-600">KPI</span>
+                                          <span className="text-brand-600">KPI</span>
             </span>
           </div>
           <button
