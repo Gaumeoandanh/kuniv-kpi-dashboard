@@ -20,17 +20,19 @@ export default function SummaryCard({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm shadow-slate-100">
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-500">{label}</span>
+    <div className="rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm shadow-slate-100 sm:rounded-2xl sm:p-5">
+      <div className="mb-1.5 flex items-center justify-between sm:mb-3">
+        <span className="text-[11px] font-medium text-slate-500 sm:text-sm">{label}</span>
         {icon && (
-          <span className={`flex h-8 w-8 items-center justify-center rounded-lg text-base ${accentMap[accent]}`}>
+          <span
+            className={`flex h-6 w-6 items-center justify-center rounded-md text-xs sm:h-8 sm:w-8 sm:rounded-lg sm:text-base ${accentMap[accent]}`}
+          >
             {icon}
           </span>
         )}
       </div>
-      <div className="text-2xl font-semibold text-slate-800">{value}</div>
-      {sub && <div className="mt-1 text-xs text-slate-400">{sub}</div>}
+      <div className="text-lg font-semibold text-slate-800 sm:text-2xl">{value}</div>
+      {sub && <div className="mt-0.5 text-[10px] text-slate-400 sm:mt-1 sm:text-xs">{sub}</div>}
     </div>
   );
 }
