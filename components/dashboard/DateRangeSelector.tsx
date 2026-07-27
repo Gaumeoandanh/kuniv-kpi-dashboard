@@ -47,10 +47,10 @@ export default function DateRangeSelector({
   }
 
   const presets: { key: DateRangePreset; label: string }[] = [
-    { key: "7d", label: "7 ngày" },
-    { key: "30d", label: "30 ngày" },
-    { key: "thisMonth", label: "Tháng hiện tại" },
-    { key: "custom", label: "Tùy chỉnh" },
+    { key: "7d", label: "7일" },
+    { key: "30d", label: "30일" },
+    { key: "thisMonth", label: "이번 달" },
+    { key: "custom", label: "직접 설정" },
   ];
 
   return (
