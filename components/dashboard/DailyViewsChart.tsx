@@ -9,6 +9,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+    LabelList,
 } from "recharts";
 import { DailyViewPoint } from "@/lib/types";
 import SectionCard from "@/components/dashboard/SectionCard";
@@ -51,7 +52,16 @@ export default function DailyViewsChart({ data }: { data: DailyViewPoint[] }) {
             <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(d) => d.slice(5)} />
             <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} allowDecimals={false} />
             <Tooltip />
-            <Line type="monotone" dataKey="views" name="조회수" stroke="#7c3aed" strokeWidth={2} dot={false} />
+                          <Line
+                                            type="monotone"
+                                            dataKey="views"
+                                            name="조회수"
+                                            stroke="#7c3aed"
+                                            strokeWidth={2}
+                                            dot={{ r: 3, strokeWidth: 0, fill: "#7c3aed" }}
+                                            activeDot={{ r: 5 }}
+                                          >
+                                          <LabelList dataKey="views" position="top" style={{ fontSize: 10, fill: "#7c3aed" }} /></Line>
           </LineChart>
         </ResponsiveContainer>
       </div>
