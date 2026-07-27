@@ -33,7 +33,7 @@ export default function UserSection({ stats }: { stats: UserStats }) {
           </span>
         ) : (
           <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-600">
-            Mock data — chưa nối nguồn thật
+                        목업 데이터 — 실제 데이터 미연동
           </span>
         )}
       </div>
