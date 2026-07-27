@@ -11,7 +11,7 @@ export default function LoginPage() {
             K-UNIV <span className="text-brand-600">KPI</span>
           </h1>
           <p className="text-center text-sm text-slate-400">
-            Dashboard nội bộ — chỉ dành cho đội ngũ K-UNIV
+                        내부 대시보드 — K-UNIV 팀 전용
           </p>
         </div>
         <LoginForm />
