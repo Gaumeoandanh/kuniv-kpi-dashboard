@@ -47,7 +47,11 @@ export default function UserSection({ stats }: { stats: UserStats }) {
 
       <SectionCard
         title="신규 회원 추이"
-        subtitle={stats.isLive ? "일별 신규 가입자 수 (추이는 예시 데이터, 위 요약 수치만 실데이터)" : "일별 신규 가입자 수"}
+                subtitle={
+                            stats.isLive
+                              ? `일별 신규 가입자 수 (K-UNIV 관리자 페이지 기준, ${new Date(stats.fetchedAt).toISOString().slice(0, 10)} 수동 갱신)`
+                              : "일별 신규 가입자 수"
+                }
         action={<DateRangeSelector onChange={setRange} />}
       >
         <div className="h-64 w-full">
