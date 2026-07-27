@@ -13,7 +13,7 @@ export default function ChannelPublishSection({ data }: { data: ChannelPublishCo
             <span className="w-20 shrink-0 text-sm text-slate-600">{CHANNEL_LABEL[d.channel]}</span>
             <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full rounded-full bg-teal-500"
+                                className="h-full rounded-full bg-brand-500"
                 style={{ width: `${(d.count / max) * 100}%` }}
               />
             </div>
