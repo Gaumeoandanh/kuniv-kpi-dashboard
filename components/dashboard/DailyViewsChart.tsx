@@ -14,12 +14,32 @@ import { DailyViewPoint } from "@/lib/types";
 import SectionCard from "@/components/dashboard/SectionCard";
 import DateRangeSelector, { ResolvedRange } from "@/components/dashboard/DateRangeSelector";
 
+/**
+ * Every calendar date between from/to (inclusive), as YYYY-MM-DD strings.
+  * Used so the 7-day / 30-day filters always show the full requested span
+   * on the X axis, instead of silently shrinking to whichever days happen
+    * to have a published post.
+     */
+function enumerateDates(from: string, to: string): string[] {
+    const dates: string[] = [];
+    const cursor = new Date(from + "T00:00:00Z");
+    const end = new Date(to + "T00:00:00Z");
+    while (cursor <= end) {
+          dates.push(cursor.toISOString().slice(0, 10));
+          cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+    return dates;
+}
 export default function DailyViewsChart({ data }: { data: DailyViewPoint[] }) {
   const [range, setRange] = useState<ResolvedRange | null>(null);
 
   const filtered = useMemo(() => {
-    if (!range) return data;
-    return data.filter((p) => p.date >= range.from && p.date <= range.to);
+        if (!range) return data;
+        const viewsByDate = new Map(data.map((p) => [p.date, p.views]));
+        return enumerateDates(range.from, range.to).map((date) => ({
+                date,
+                views: viewsByDate.get(date) ?? 0,
+        }));
   }, [range, data]);
 
   return (
