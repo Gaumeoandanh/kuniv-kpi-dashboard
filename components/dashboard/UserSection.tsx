@@ -9,6 +9,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+    LabelList,
 } from "recharts";
 import { UserStats } from "@/lib/types";
 import SummaryCard from "@/components/dashboard/SummaryCard";
@@ -54,9 +55,17 @@ export default function UserSection({ stats }: { stats: UserStats }) {
             <LineChart data={filtered} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(d) => d.slice(5)} />
-              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} allowDecimals={false} />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" name="신규 회원" stroke="#0d9488" strokeWidth={2} dot={false} />
+                            <Line
+                                              type="monotone"
+                                              dataKey="count"
+                                              name="신규 회원"
+                                              stroke="#0a3696"
+                                              strokeWidth={2}
+                                              dot={{ r: 3, strokeWidth: 0, fill: "#0a3696" }}
+                                              activeDot={{ r: 5 }}
+                                                            >
+                                            <LabelList dataKey="count" position="top" style={{ fontSize: 10, fill: "#0a3696" }} /></Line>
+                            <Tooltip />
             </LineChart>
           </ResponsiveContainer>
         </div>
