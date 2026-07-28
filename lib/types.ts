@@ -50,6 +50,7 @@ export interface ContentMetric {
   sharesD7: number | null;
   primaryViews: number | null; // = views.d7
   isDataComplete: boolean; // >= 7 ngày kể từ publishedDate
+  link: string | null; // 원본 게시물 링크 (sheet 컬럼 L)
 }
 
 export interface ContentSummary {
