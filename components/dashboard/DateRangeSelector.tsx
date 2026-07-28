@@ -27,7 +27,7 @@ export default function DateRangeSelector({
 }: {
   onChange: (range: ResolvedRange) => void;
 }) {
-  const [preset, setPreset] = useState<DateRangePreset>("30d");
+  const [preset, setPreset] = useState<DateRangePreset>("7d");
   const [customFrom, setCustomFrom] = useState(isoDaysAgo(30));
   const [customTo, setCustomTo] = useState(todayISO());
 
