@@ -141,11 +141,12 @@ function getAuth() {
 
 /** row = [번호, 날짜, 채널, 제목, D+1, D+3, D+7, 좋아요, 댓글, 공유, 링크] */
 export function mapRawRowToContentMetric(row: unknown[], index: number): ContentMetric | null {
-  const [num, dateRaw, channelRaw, title, d1, d3, d7, likes, comments, shares] = row;
+  const [num, dateRaw, channelRaw, title, d1, d3, d7, likes, comments, shares, link] = row;
   if (!title || (typeof title === "string" && title.trim() === "")) return null;
 
   const publishedDate = parseSheetDate(dateRaw);
   const d7Views = parseMetricCell(d7);
+  const linkStr = typeof link === "string" ? link.trim() : "";
 
   return {
     id: `row-${num ?? index}-${publishedDate}`,
@@ -163,6 +164,7 @@ export function mapRawRowToContentMetric(row: unknown[], index: number): Content
     sharesD7: parseMetricCell(shares),
     primaryViews: d7Views,
     isDataComplete: publishedDate ? isDataComplete(publishedDate) : false,
+    link: linkStr.length > 0 ? linkStr : null,
   };
 }
 
