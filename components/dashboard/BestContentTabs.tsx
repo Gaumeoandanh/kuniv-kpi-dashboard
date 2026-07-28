@@ -43,32 +43,56 @@ export default function BestContentTabs({ rows }: { rows: ContentMetric[] }) {
         {top.length === 0 && (
           <p className="py-6 text-center text-sm text-slate-400">아직 데이터가 없습니다.</p>
         )}
-        {top.map(({ row, value }, idx) => (
-          <div key={row.id} className="flex items-center gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-500">
-              {idx + 1}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <p className="truncate text-sm font-medium text-slate-700">{row.title}</p>
-                <span className="shrink-0 text-sm font-semibold text-slate-800">
-                  {value.toLocaleString()}
-                </span>
+        {top.map(({ row, value }, idx) => {
+          const content = (
+            <>
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-500">
+                {idx + 1}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p
+                    className={`truncate text-sm font-medium text-slate-700 ${
+                      row.link ? "group-hover:text-brand-600 group-hover:underline" : ""
+                    }`}
+                  >
+                    {row.title}
+                  </p>
+                  <span className="shrink-0 text-sm font-semibold text-slate-800">
+                    {value.toLocaleString()}
+                  </span>
+                </div>
+                <div className="mb-1 flex items-center gap-2 text-[11px] text-slate-400">
+                  <span>{CHANNEL_LABEL[row.channel]}</span>
+                  <span>·</span>
+                  <span>{row.publishedDate}</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-brand-500"
+                    style={{ width: `${Math.max(4, (value / max) * 100)}%` }}
+                  />
+                </div>
               </div>
-              <div className="mb-1 flex items-center gap-2 text-[11px] text-slate-400">
-                <span>{CHANNEL_LABEL[row.channel]}</span>
-                <span>·</span>
-                <span>{row.publishedDate}</span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-brand-500"
-                  style={{ width: `${Math.max(4, (value / max) * 100)}%` }}
-                />
-              </div>
+            </>
+          );
+
+          return row.link ? (
+            <a
+              key={row.id}
+              href={row.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 rounded-lg transition hover:bg-slate-50"
+            >
+              {content}
+            </a>
+          ) : (
+            <div key={row.id} className="group flex items-center gap-3">
+              {content}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </SectionCard>
   );
