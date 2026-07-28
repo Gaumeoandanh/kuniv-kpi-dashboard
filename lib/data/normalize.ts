@@ -41,7 +41,8 @@ export function parseMetricCell(raw: unknown): number | null {
 /**
  * Google Sheets returns date cells as a serial number (days since
  * 1899-12-30) when using UNFORMATTED_VALUE, or as a locale-formatted
- * string ("일요일, 5 7월, 2026") when using FORMATTED_VALUE. Handle both,
+ * string ("일요일, 5 7월, 2026") when using FORMATTED_VALUE — which is
+ * also the format the public gviz CSV export returns. Handle both,
  * falling back to the raw string if it can't be parsed.
  */
 export function parseSheetDate(raw: unknown): string {
@@ -50,6 +51,15 @@ export function parseSheetDate(raw: unknown): string {
     return new Date(epoch + raw * 86400000).toISOString().slice(0, 10);
   }
   if (typeof raw === "string") {
+    // Korean locale format, e.g. "일요일, 5 7월, 2026" (weekday, day, month월, year).
+    // JS's native Date parser does not understand this, so extract it manually
+    // before falling back to a generic parse.
+    const koreanMatch = raw.match(/(\d{1,2})\s+(\d{1,2})월,\s*(\d{4})/);
+    if (koreanMatch) {
+      const [, day, month, year] = koreanMatch;
+      const d = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+      if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    }
     const parsed = new Date(raw);
     if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
     return raw;
