@@ -91,6 +91,7 @@ export const mockContentRows: ContentMetric[] = Array.from({ length: 24 }).map((
     sharesD7: complete ? Math.round((d7 ?? 0) * 0.02) : null,
     primaryViews: d7,
     isDataComplete: complete,
+    link: null,
   };
 });
 
