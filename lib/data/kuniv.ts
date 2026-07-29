@@ -1,6 +1,7 @@
-import { UserStats } from "@/lib/types";
+import { UserStats, MemberListEntry } from "@/lib/types";
 import snapshot from "@/lib/data/userSnapshot.json";
 import dailySnapshot from "@/lib/data/dailySignupsSnapshot.json";
+import memberListSnapshot from "@/lib/data/memberListSnapshot.json";
 
 /**
  * 사용자 (member) stats.
@@ -30,14 +31,27 @@ import dailySnapshot from "@/lib/data/dailySignupsSnapshot.json";
  * curve — see CHANGELOG note in that file for how to refresh it.
  */
 export async function getUserStats(): Promise<UserStats> {
-    return {
-          totalMembers: snapshot.totalMembers,
-          activeMembers: snapshot.activeMembers,
-          newMembersThisMonth: snapshot.newMembersThisMonth,
-          churnedMembers: snapshot.churnedMembers,
-          dailySignups: dailySnapshot.dailySignups,
-          isLive: true,
-          source: "kuniv_admin",
-          fetchedAt: snapshot.fetchedAt,
-    };
+  return {
+    totalMembers: snapshot.totalMembers,
+    activeMembers: snapshot.activeMembers,
+    newMembersThisMonth: snapshot.newMembersThisMonth,
+    churnedMembers: snapshot.churnedMembers,
+    dailySignups: dailySnapshot.dailySignups,
+    isLive: true,
+    source: "kuniv_admin",
+    fetchedAt: snapshot.fetchedAt,
+  };
+}
+
+/**
+ * 전체 회원 목록 (이름 + 국가만) — see lib/data/memberListSnapshot.json.
+ *
+ * PII EXCEPTION: every other function in this file returns aggregate
+ * numbers only. This one returns per-member names, which the project's
+ * standing rule normally forbids — the account owner explicitly asked
+ * for this feature and confirmed accepting that tradeoff (2026-07-29).
+ * Do not add email, passport name, or phone number here.
+ */
+export async function getMemberList(): Promise<MemberListEntry[]> {
+  return memberListSnapshot.members;
 }
