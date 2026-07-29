@@ -44,13 +44,14 @@ export default async function MembersPage() {
         </div>
       </SectionCard>
 
-      <SectionCard title="회원 이름 · 국가" subtitle="최신 가입순">
+      <SectionCard title="회원 이름 · 국가 · 가입일" subtitle="최신 가입순">
         <div className="divide-y divide-slate-100">
           {members.map((m, i) => (
             <div key={`${m.name}-${i}`} className="flex items-center gap-3 py-2.5">
               <span className="w-8 shrink-0 text-right text-xs text-slate-400">{members.length - i}</span>
               <span className="text-lg">{m.countryFlag}</span>
-              <span className="text-sm text-slate-700">{m.name}</span>
+              <span className="flex-1 text-sm text-slate-700">{m.name}</span>
+              <span className="shrink-0 text-xs text-slate-400">{m.signupDate}</span>
             </div>
           ))}
         </div>
