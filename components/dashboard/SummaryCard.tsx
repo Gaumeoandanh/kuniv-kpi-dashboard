@@ -4,12 +4,15 @@ export default function SummaryCard({
   sub,
   icon,
   accent = "brand",
+  href,
 }: {
   label: string;
   value: string | number;
   sub?: string;
   icon?: React.ReactNode;
   accent?: "brand" | "amber" | "rose" | "violet" | "slate";
+  /** Optional link — if set, the whole card becomes a clickable link (opens in a new tab). */
+  href?: string;
 }) {
   const accentMap: Record<string, string> = {
     brand: "text-brand-600 bg-brand-50",
@@ -19,8 +22,8 @@ export default function SummaryCard({
     slate: "text-slate-600 bg-slate-100",
   };
 
-  return (
-    <div className="rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm shadow-slate-100 sm:rounded-2xl sm:p-5">
+  const content = (
+    <>
       <div className="mb-1.5 flex items-center justify-between sm:mb-3">
         <span className="text-[11px] font-medium text-slate-500 sm:text-sm">{label}</span>
         {icon && (
@@ -33,6 +36,20 @@ export default function SummaryCard({
       </div>
       <div className="text-lg font-semibold text-slate-800 sm:text-2xl">{value}</div>
       {sub && <div className="mt-0.5 text-[10px] text-slate-400 sm:mt-1 sm:text-xs">{sub}</div>}
-    </div>
+    </>
   );
+
+  const className =
+    "block rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm shadow-slate-100 sm:rounded-2xl sm:p-5" +
+    (href ? " transition hover:border-brand-200 hover:shadow-md" : "");
+
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {content}
+      </a>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
 }
