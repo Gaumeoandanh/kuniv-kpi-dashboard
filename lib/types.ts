@@ -96,10 +96,11 @@ export interface DailyViewPoint {
 }
 
 /**
- * 전체 회원 목록 항목 — 이름 + 국가만 (이메일/여권명/전화번호 없음).
+ * 전체 회원 목록 항목 — 이름 + 국가 + 가입일 (이메일/여권명/전화번호 없음).
  * See lib/data/memberListSnapshot.json for the PII-exception note.
  */
 export interface MemberListEntry {
   name: string;
   countryFlag: string;
+  signupDate: string; // ISO date (YYYY-MM-DD)
 }
