@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function SummaryCard({
   label,
   value,
@@ -11,9 +13,14 @@ export default function SummaryCard({
   sub?: string;
   icon?: React.ReactNode;
   accent?: "brand" | "amber" | "rose" | "violet" | "slate";
-  /** Optional link — if set, the whole card becomes a clickable link (opens in a new tab). */
+  /**
+   * Optional link — if set, the whole card becomes clickable.
+   * Internal paths (starting with "/") navigate within the app;
+   * external URLs open in a new tab.
+   */
   href?: string;
 }) {
+  const isInternal = href?.startsWith("/") ?? false;
   const accentMap: Record<string, string> = {
     brand: "text-brand-600 bg-brand-50",
     amber: "text-amber-600 bg-amber-50",
@@ -42,6 +49,14 @@ export default function SummaryCard({
   const className =
     "block rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm shadow-slate-100 sm:rounded-2xl sm:p-5" +
     (href ? " transition hover:border-brand-200 hover:shadow-md" : "");
+
+  if (href && isInternal) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
 
   if (href) {
     return (
