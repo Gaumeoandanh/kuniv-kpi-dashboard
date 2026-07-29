@@ -103,13 +103,19 @@ function parseCsv(text: string): string[][] {
  * Fetch a single tab of the spreadsheet as CSV via Google's public gviz
  * export endpoint. Only works if the sheet is shared as "anyone with the
  * link can view" — returns null on any failure so callers can fall back.
+ *
+ * No caching: the dashboard page itself is `force-dynamic` (re-runs on
+ * every request), and this fetch uses `cache: "no-store"` so it always
+ * pulls the sheet's current values — any edit made in the sheet shows up
+ * the moment the dashboard page is next loaded/reloaded, with no stale
+ * window in between (2026-07-29: 사용자 요청으로 5분 캐시 제거, 즉시 반영).
  */
 async function fetchPublicSheetCsv(tabName: string): Promise<string[][] | null> {
   const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID || DEFAULT_SPREADSHEET_ID;
   const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
 
   try {
-    const res = await fetch(url, { next: { revalidate: 300 } });
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return null;
     const text = await res.text();
     return parseCsv(text);
