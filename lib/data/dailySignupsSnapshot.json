@@ -1,8 +1,7 @@
 {
-  "fetchedAt": "2026-07-28T00:00:00.000Z",
-  "note": "Manually pulled from K-UNIV admin (회원 관리 > 전체 회원 목록, 가입일 column, last 30 days = 2026-06-29~2026-07-28). Counts are aggregated signup-date totals only — no names/emails were recorded, per the no-PII rule. Cross-checked against the admin dashboard's own '이번 달 신규 회원 +30' counter — totals match exactly (sum of all counts below = 30). Re-run this pull to refresh (ask Claude to \"cập nhật số liệu\").",
+  "fetchedAt": "2026-07-29T00:00:00.000Z",
+  "note": "Manually pulled from K-UNIV admin (회원 관리 > 전체 회원 목록, 가입일 column, last 30 days = 2026-06-30~2026-07-29). Counts are aggregated signup-date totals only — no names/emails were recorded, per the no-PII rule. Cross-checked against the admin dashboard's own '이번 달 신규 회원 +36' counter — totals match exactly (sum of all counts below = 36). Re-run this pull to refresh (ask Claude to \"cập nhật số liệu\").",
   "dailySignups": [
-    { "date": "2026-06-29", "count": 0 },
     { "date": "2026-06-30", "count": 0 },
     { "date": "2026-07-01", "count": 0 },
     { "date": "2026-07-02", "count": 1 },
@@ -31,6 +30,7 @@
     { "date": "2026-07-25", "count": 0 },
     { "date": "2026-07-26", "count": 0 },
     { "date": "2026-07-27", "count": 3 },
-    { "date": "2026-07-28", "count": 1 }
+    { "date": "2026-07-28", "count": 2 },
+    { "date": "2026-07-29", "count": 5 }
   ]
 }
