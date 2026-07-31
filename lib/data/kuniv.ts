@@ -15,6 +15,20 @@ export function isStaffMember(m: MemberListEntry): boolean {
   return !!a && a !== "-";
 }
 
+const REAL_MEMBERS: MemberListEntry[] = ALL_MEMBERS.filter((m) => !isStaffMember(m));
+
+/** fetchedAt 기준 최근 30일 (그날 포함) 날짜 문자열 목록, 오래된 순. */
+function last30DaysWindow(): string[] {
+  const asOf = new Date(memberListSnapshot.fetchedAt);
+  const days: string[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(asOf);
+    d.setUTCDate(d.getUTCDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  return days;
+}
+
 /**
  * 사용자 (member) stats — 실제 회원(학생)만 집계, 학교 관계자 제외.
  *
@@ -37,20 +51,13 @@ export function isStaffMember(m: MemberListEntry): boolean {
  * (isStaffMember() === true) 계정은 전부 제외한다.
  */
 export async function getUserStats(): Promise<UserStats> {
-  const real = ALL_MEMBERS.filter((m) => !isStaffMember(m));
-  const asOf = new Date(memberListSnapshot.fetchedAt);
+  const real = REAL_MEMBERS;
 
   const totalMembers = real.length;
   const activeMembers = real.filter((m) => m.status === "정상").length;
   const churnedMembers = real.filter((m) => m.status === "탈퇴").length;
 
-  // fetchedAt 기준 최근 30일 (그날 포함) 일별 신규 가입 추이.
-  const days: string[] = [];
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(asOf);
-    d.setUTCDate(d.getUTCDate() - i);
-    days.push(d.toISOString().slice(0, 10));
-  }
+  const days = last30DaysWindow();
   const countByDate = new Map<string, number>(days.map((d) => [d, 0]));
   for (const m of real) {
     if (countByDate.has(m.signupDate)) {
@@ -88,10 +95,32 @@ export async function getMemberList(): Promise<MemberListEntry[]> {
 
 /** 실제 회원(학생)만 — 소속/직위가 "-"인 계정. */
 export async function getRealMembers(): Promise<MemberListEntry[]> {
-  return ALL_MEMBERS.filter((m) => !isStaffMember(m));
+  return REAL_MEMBERS;
 }
 
 /** 학교 관계자/직원 계정만 — 소속/직위 값이 있는 계정. */
 export async function getStaffMembers(): Promise<MemberListEntry[]> {
   return ALL_MEMBERS.filter(isStaffMember);
+}
+
+/**
+ * 이번 달 신규 회원 (실제 회원 중 fetchedAt 기준 최근 30일 가입) —
+ * "이번 달 신규 회원" 카드 클릭 시 표시되는 목록. UserStats.newMembersThisMonth
+ * 와 동일한 30일 윈도우로 계산하므로 카드 숫자와 리스트 인원수가 항상 일치.
+ */
+export async function getNewMembersThisMonth(): Promise<MemberListEntry[]> {
+  const days = new Set(last30DaysWindow());
+  return REAL_MEMBERS.filter((m) => days.has(m.signupDate)).sort((a, b) =>
+    b.signupDate.localeCompare(a.signupDate)
+  );
+}
+
+/**
+ * 탈퇴한 실제 회원 목록 — "탈퇴" 카드 클릭 시 표시되는 목록.
+ * UserStats.churnedMembers 와 동일 기준(실제 회원 + status === "탈퇴").
+ */
+export async function getChurnedMembers(): Promise<MemberListEntry[]> {
+  return REAL_MEMBERS.filter((m) => m.status === "탈퇴").sort((a, b) =>
+    b.signupDate.localeCompare(a.signupDate)
+  );
 }
