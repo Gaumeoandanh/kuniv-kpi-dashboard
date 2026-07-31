@@ -1,7 +1,7 @@
 import Link from "next/link";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import SectionCard from "@/components/dashboard/SectionCard";
-import { getMemberList } from "@/lib/data/kuniv";
+import { getRealMembers, getStaffMembers } from "@/lib/data/kuniv";
 
 // PII EXCEPTION — see lib/data/memberListSnapshot.json for context. This
 // page (and only this page) shows member account names, per an explicit
@@ -10,9 +10,10 @@ import { getMemberList } from "@/lib/data/kuniv";
 export const dynamic = "force-dynamic";
 
 export default async function MembersPage() {
-  const members = await getMemberList();
+  const [realMembers, staffMembers] = await Promise.all([getRealMembers(), getStaffMembers()]);
+  const total = realMembers.length + staffMembers.length;
 
-  const countryCounts = members.reduce<Record<string, number>>((acc, m) => {
+  const countryCounts = realMembers.reduce<Record<string, number>>((acc, m) => {
     acc[m.countryFlag] = (acc[m.countryFlag] ?? 0) + 1;
     return acc;
   }, {});
@@ -30,7 +31,12 @@ export default async function MembersPage() {
         <h1 className="text-lg font-semibold text-slate-800">전체 회원 목록</h1>
       </div>
 
-      <SectionCard title="국가별 분포" subtitle={`총 ${members.length}명`}>
+      <p className="text-xs text-slate-400">
+        총 {total}개 계정 · 실제 회원(학생) {realMembers.length}명 · 학교 관계자 {staffMembers.length}명 —
+        K-UNIV admin의 소속/직위 컬럼 기준으로 자동 분류 (값 없음 = 실제 회원)
+      </p>
+
+      <SectionCard title="국가별 분포" subtitle={`실제 회원 기준 · 총 ${realMembers.length}명`}>
         <div className="flex flex-wrap gap-2">
           {countryEntries.map(([flag, count]) => (
             <span
@@ -44,14 +50,34 @@ export default async function MembersPage() {
         </div>
       </SectionCard>
 
-      <SectionCard title="회원 이름 · 국가 · 가입일" subtitle="최신 가입순">
+      <SectionCard title="실제 회원 (학생)" subtitle={`${realMembers.length}명 · 최신 가입순`}>
         <div className="divide-y divide-slate-100">
-          {members.map((m, i) => (
+          {realMembers.map((m, i) => (
             <div key={`${m.name}-${i}`} className="flex items-center gap-3 py-2.5">
-              <span className="w-8 shrink-0 text-right text-xs text-slate-400">{members.length - i}</span>
+              <span className="w-8 shrink-0 text-right text-xs text-slate-400">{realMembers.length - i}</span>
               <span className="text-lg">{m.countryFlag}</span>
               <span className="flex-1 text-sm text-slate-700">{m.name}</span>
+              {m.status === "탈퇴" && (
+                <span className="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-medium text-rose-500">
+                  탈퇴
+                </span>
+              )}
               <span className="shrink-0 text-xs text-slate-400">{m.signupDate}</span>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="학교 관계자 / 직원 계정" subtitle={`${staffMembers.length}명 · 소속/직위 기준 자동 분류`}>
+        <div className="divide-y divide-slate-100">
+          {staffMembers.map((m, i) => (
+            <div key={`${m.name}-${i}`} className="flex items-center gap-3 py-2.5">
+              <span className="w-8 shrink-0 text-right text-xs text-slate-400">{staffMembers.length - i}</span>
+              <span className="text-lg">{m.countryFlag}</span>
+              <span className="flex-1 text-sm text-slate-700">{m.name}</span>
+              <span className="shrink-0 max-w-[45%] truncate text-right text-xs text-slate-400">
+                {m.affiliation}
+              </span>
             </div>
           ))}
         </div>
