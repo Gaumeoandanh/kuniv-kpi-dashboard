@@ -54,8 +54,22 @@ export default function UserSection({ stats }: { stats: UserStats }) {
           icon="👥"
           href="/dashboard/members"
         />
-        <SummaryCard label="이번 달 신규 회원" value={`+${stats.newMembersThisMonth}`} sub="최근 30일 가입" accent="violet" icon="🌱" />
-        <SummaryCard label="탈퇴" value={stats.churnedMembers} sub="누적" accent="rose" icon="👋" />
+        <SummaryCard
+          label="이번 달 신규 회원"
+          value={`+${stats.newMembersThisMonth}`}
+          sub="최근 30일 가입"
+          accent="violet"
+          icon="🌱"
+          href="/dashboard/members?filter=new"
+        />
+        <SummaryCard
+          label="탈퇴"
+          value={stats.churnedMembers}
+          sub="누적"
+          accent="rose"
+          icon="👋"
+          href="/dashboard/members?filter=churned"
+        />
       </div>
 
       <SectionCard
