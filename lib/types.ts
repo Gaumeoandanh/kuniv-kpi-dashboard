@@ -96,11 +96,18 @@ export interface DailyViewPoint {
 }
 
 /**
- * 전체 회원 목록 항목 — 이름 + 국가 + 가입일 (이메일/여권명/전화번호 없음).
+ * 전체 회원 목록 항목 — 이름 + 국가 + 가입일 + 계정상태 + 소속/직위
+ * (이메일/여권명/전화번호 없음).
  * See lib/data/memberListSnapshot.json for the PII-exception note.
+ *
+ * affiliation은 K-UNIV admin의 소속/직위 컬럼 원본값 그대로 저장됨.
+ * "-"(값 없음)이면 실제 회원(학생), 값이 있으면 학교 관계자/직원 계정으로
+ * 간주 — see isStaffMember() in lib/data/kuniv.ts.
  */
 export interface MemberListEntry {
   name: string;
   countryFlag: string;
   signupDate: string; // ISO date (YYYY-MM-DD)
+  status: "정상" | "탈퇴";
+  affiliation: string; // "-" = 소속 없음(실제 회원), 그 외 = 소속/직위 텍스트(관계자)
 }
