@@ -23,6 +23,12 @@ function defaultRange(): ResolvedRange {
   return { preset: "7d", from, to };
 }
 
+/** "8월" 처럼 fetchedAt 기준 달력 월을 한국어로 표시 (이번 달 신규 회원 카드용). */
+function currentMonthLabel(fetchedAt: string): string {
+  const month = Number(fetchedAt.slice(5, 7));
+  return `${month}월`;
+}
+
 export default function UserSection({ stats }: { stats: UserStats }) {
   const [range, setRange] = useState<ResolvedRange>(defaultRange());
 
@@ -57,7 +63,7 @@ export default function UserSection({ stats }: { stats: UserStats }) {
         <SummaryCard
           label="이번 달 신규 회원"
           value={`+${stats.newMembersThisMonth}`}
-          sub="최근 30일 가입"
+          sub={`${currentMonthLabel(stats.fetchedAt)} 가입`}
           accent="violet"
           icon="🌱"
           href="/dashboard/members?filter=new"
