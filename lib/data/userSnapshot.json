@@ -1,8 +1,8 @@
 {
-    "totalMembers": 73,
-    "activeMembers": 72,
-    "newMembersThisMonth": 44,
-    "churnedMembers": 1,
-    "fetchedAt": "2026-07-31T09:36:31.000Z",
-    "note": "Manually pulled from K-UNIV admin (회원 관리) on 2026-07-31. Aggregate counts only — no member names/emails stored here, per the no-PII rule. To refresh: ask Claude to 'update user stats from K-UNIV admin'"
+        "totalMembers": 83,
+        "activeMembers": 82,
+        "newMembersThisMonth": 52,
+        "churnedMembers": 1,
+        "fetchedAt": "2026-08-03T01:08:14.000Z",
+        "note": "Manually pulled from K-UNIV admin (회원 관리) on 2026-08-03. Aggregate counts only — no member names/emails stored here, per the no-PII rule. To refresh: ask Claude to 'update user stats from K-UNIV admin'"
 }
