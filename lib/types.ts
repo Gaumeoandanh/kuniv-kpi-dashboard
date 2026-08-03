@@ -111,3 +111,9 @@ export interface MemberListEntry {
   status: "정상" | "탈퇴";
   affiliation: string; // "-" = 소속 없음(실제 회원), 그 외 = 소속/직위 텍스트(관계자)
 }
+
+/** 월별 신규 가입자 수 — 전체 회원 목록 페이지의 "월별 신규 가입" 섹션에서 사용. */
+export interface MonthlyMemberCount {
+  month: string; // "YYYY-MM"
+  count: number;
+}
