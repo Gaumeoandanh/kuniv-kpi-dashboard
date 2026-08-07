@@ -1,8 +1,8 @@
 {
-        	"totalMembers": 129,
-        	"activeMembers": 128,
-        	"newMembersThisMonth": 98,
-        	"churnedMembers": 1,
-        	"fetchedAt": "2026-08-06T01:34:44.000Z",
-        	"note": "Manually pulled from K-UNIV admin (회원 관리) on 2026-08-06. newMembersThisMonth is the rolling 30-day count (matches the admin panel's own '1개월' quick filter, 총 98명, 2026-07-06~2026-08-06) and matches dailySignupsSnapshot.json's sum, consistent with prior refreshes. Note: the dashboard's '이번 달 신규 회원' card shows +54, which appears to use a calendar-month (Aug 1-6) definition instead — flagged for the user to confirm which definition should be canonical. Aggregate counts only — no member names/emails stored here, per the no-PII rule. To refresh: ask Claude to 'update user stats from K-UNIV admin'"
+          "totalMembers": 132,
+          "activeMembers": 131,
+          "newMembersThisMonth": 99,
+          "churnedMembers": 1,
+          "fetchedAt": "2026-08-07T01:30:03.000Z",
+          "note": "Manually pulled from K-UNIV admin (회원 관리) on 2026-08-07. newMembersThisMonth is the rolling 30-day count (2026-07-09~2026-08-07), matching dailySignupsSnapshot.json's sum, consistent with prior refreshes. Account status breakdown from the 계정 상태 filter: 정상(active) 131, 정지(suspended) 0, 탈퇴(withdrawn) 1. Aggregate counts only — no member names/emails stored here, per the no-PII rule. To refresh: ask Claude to 'update user stats from K-UNIV admin'"
 }
