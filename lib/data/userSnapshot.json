@@ -1,8 +1,8 @@
 {
-            "totalMembers": 136,
-            "activeMembers": 135,
-            "newMembersThisMonth": 100,
-            "churnedMembers": 1,
-            "fetchedAt": "2026-08-10T01:21:12.000Z",
-            "note": "Manually pulled from K-UNIV admin (회원 관리) on 2026-08-10. newMembersThisMonth is the rolling 30-day count (2026-07-12~2026-08-10), matching dailySignupsSnapshot.json's sum, consistent with prior refreshes. Account status breakdown from the 계정 상태 filter: 정상(active) 135, 정지(suspended) 0, 탈퇴(withdrawn) 1. Aggregate counts only — no member names/emails stored here, per the no-PII rule. To refresh: ask Claude to 'update user stats from K-UNIV admin'"
+              "totalMembers": 143,
+              "activeMembers": 142,
+              "newMembersThisMonth": 104,
+              "churnedMembers": 1,
+              "fetchedAt": "2026-08-13T02:32:11.000Z",
+              "note": "Manually pulled from K-UNIV admin (회원 관리) on 2026-08-13. newMembersThisMonth is the rolling 30-day count (2026-07-15~2026-08-13), matching dailySignupsSnapshot.json's sum, consistent with prior refreshes. Account status breakdown from 회원 상태별 분포: 활성(active) 142, 탈퇴(withdrawn) 1. Aggregate counts only — no member names/emails stored here, per the no-PII rule. To refresh: ask Claude to 'update user stats from K-UNIV admin'"
 }
