@@ -1,7 +1,7 @@
 // Shared types for the KPI dashboard.
 // Mirrors the schema agreed in DATA_SOURCE_MAP.md.
 
-export type DateRangePreset = "7d" | "30d" | "thisMonth" | "custom";
+export type DateRangePreset = "7d" | "30d" | "1y" | "thisMonth" | "custom";
 
 export interface DateRange {
   from: string; // ISO date
@@ -77,6 +77,32 @@ export interface ChannelPerformance {
   totalShares: number;
 }
 
+/**
+ * 채널별 "효율" — 총합이 아니라 게시물 1개당 평균. 총합 기준인
+ * ChannelPerformance와 달리, 게시물을 많이 올린 채널이 무조건 유리해지는
+ * 착시를 피하기 위한 지표. avgViews는 조회수가 아직 없는(D+7 미집계) 게시물을
+ * 분모에서 제외하고 계산 — "종합 현황" 섹션의 채널별 효율 랭킹에서 사용.
+ */
+export interface ChannelEfficiency {
+  channel: ContentChannel;
+  postCount: number;
+  avgViews: number | null; // 조회수 있는 게시물만 분모
+  avgLikes: number | null;
+  avgComments: number | null;
+  avgShares: number | null;
+  engagementRate: number | null; // (총 좋아요+댓글+공유) / 총 조회수, 조회수 0이면 null
+}
+
+/** 월별 콘텐츠 성과 합계 — "종합 현황"의 기간 비교 테이블에서 사용. */
+export interface MonthlyContentSummary {
+  month: string; // "YYYY-MM"
+  totalPublished: number;
+  totalViews: number;
+  totalLikes: number;
+  totalComments: number;
+  totalShares: number;
+}
+
 /** 전환 성과 */
 export interface ConversionStats {
   websiteVisits: number;
@@ -116,4 +142,17 @@ export interface MemberListEntry {
 export interface MonthlyMemberCount {
   month: string; // "YYYY-MM"
   count: number;
+}
+
+/**
+ * 이번 달 신규 회원 목표 달성 현황 — "종합 현황"의 목표 진행률 카드에서 사용.
+ * 목표(target)는 사람이 입력하는 값이 아니라 "바로 전월의 실제 신규 회원 수"로
+ * 자동 계산됨 (2026-08-15, 계정 owner 결정) — 데이터가 갱신될 때마다 목표도
+ * 같이 자동으로 갱신되고, 별도로 관리할 설정 파일이 없음.
+ */
+export interface MonthlyGoalStatus {
+  month: string; // "YYYY-MM" — 이번 달
+  target: number; // = 전월 실제 신규 회원 수
+  actual: number; // 이번 달 실제 신규 회원 수 (현재까지)
+  achievementPercent: number | null; // actual/target*100, target이 0이면 null
 }

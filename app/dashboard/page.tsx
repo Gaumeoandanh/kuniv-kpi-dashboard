@@ -1,18 +1,23 @@
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import ProjectOverviewSection from "@/components/dashboard/ProjectOverviewSection";
+import PeriodComparisonTable from "@/components/dashboard/PeriodComparisonTable";
 import UserSection from "@/components/dashboard/UserSection";
 import ContentPerformanceSection from "@/components/dashboard/ContentPerformanceSection";
 import DailyViewsChart from "@/components/dashboard/DailyViewsChart";
 import BestContentTabs from "@/components/dashboard/BestContentTabs";
 import ChannelPublishSection from "@/components/dashboard/ChannelPublishSection";
 import ChannelPerformanceSection from "@/components/dashboard/ChannelPerformanceSection";
+import ChannelEfficiencySection from "@/components/dashboard/ChannelEfficiencySection";
 
-import { getUserStats } from "@/lib/data/kuniv";
+import { getUserStats, getMemberCountsByMonth, getRealMembers } from "@/lib/data/kuniv";
 import { getContentMetrics } from "@/lib/data/sheets";
 import {
   summarizeContent,
   dailyViewsFromContent,
   channelPublishCounts,
   channelPerformance,
+  contentSummaryByMonth,
+  channelEfficiency,
 } from "@/lib/aggregate";
 
 // 가입 유입경로 (SignupSourceSection) and 전환 성과 (ConversionSection) are
@@ -27,16 +32,34 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [userStats, contentRows] = await Promise.all([getUserStats(), getContentMetrics()]);
+  const [userStats, contentRows, monthlyMemberCounts, realMembers] = await Promise.all([
+    getUserStats(),
+    getContentMetrics(),
+    getMemberCountsByMonth(),
+    getRealMembers(),
+  ]);
 
   const contentSummary = summarizeContent(contentRows);
   const dailyViews = dailyViewsFromContent(contentRows);
   const publishCounts = channelPublishCounts(contentRows);
   const perfByChannel = channelPerformance(contentRows);
+  const monthlyContent = contentSummaryByMonth(contentRows);
+  const channelEff = channelEfficiency(contentRows);
 
   return (
     <DashboardShell>
-      <UserSection stats={userStats} />
+      <ProjectOverviewSection
+        userStats={userStats}
+        monthlyMemberCounts={monthlyMemberCounts}
+        monthlyContent={monthlyContent}
+        channelEff={channelEff}
+      />
+
+      <PeriodComparisonTable monthlyMemberCounts={monthlyMemberCounts} monthlyContent={monthlyContent} />
+
+      <div className="border-t border-slate-100 pt-2" />
+
+      <UserSection stats={userStats} monthlyCounts={monthlyMemberCounts} realMembers={realMembers} />
 
       <div className="border-t border-slate-100 pt-2" />
 
@@ -49,6 +72,7 @@ export default async function DashboardPage() {
           <ChannelPublishSection data={publishCounts} />
           <ChannelPerformanceSection data={perfByChannel} />
         </div>
+        <ChannelEfficiencySection data={channelEff} />
       </section>
     </DashboardShell>
   );

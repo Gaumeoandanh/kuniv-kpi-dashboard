@@ -35,6 +35,7 @@ export default function DateRangeSelector({
     setPreset(p);
     if (p === "7d") onChange({ preset: p, from: isoDaysAgo(6), to: todayISO() });
     else if (p === "30d") onChange({ preset: p, from: isoDaysAgo(29), to: todayISO() });
+    else if (p === "1y") onChange({ preset: p, from: isoDaysAgo(364), to: todayISO() });
     else if (p === "thisMonth") onChange({ preset: p, from: startOfMonthISO(), to: todayISO() });
     else onChange({ preset: p, from: customFrom, to: customTo });
   }
@@ -49,6 +50,7 @@ export default function DateRangeSelector({
   const presets: { key: DateRangePreset; label: string }[] = [
     { key: "7d", label: "7일" },
     { key: "30d", label: "30일" },
+    { key: "1y", label: "1년" },
     { key: "thisMonth", label: "이번 달" },
     { key: "custom", label: "직접 설정" },
   ];

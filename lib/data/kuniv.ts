@@ -1,7 +1,34 @@
+import fs from "fs";
+import path from "path";
 import { UserStats, MemberListEntry, MonthlyMemberCount } from "@/lib/types";
-import memberListSnapshot from "@/lib/data/memberListSnapshot.json";
 
-const ALL_MEMBERS: MemberListEntry[] = memberListSnapshot.members as MemberListEntry[];
+type MemberListSnapshot = {
+  fetchedAt: string;
+  members: MemberListEntry[];
+};
+
+const SNAPSHOT_PATH = path.join(process.cwd(), "lib/data/memberListSnapshot.json");
+
+/**
+ * memberListSnapshot.json을 매 호출마다 디스크에서 새로 읽어온다.
+ *
+ * 2026-08-11 변경: 예전에는 `import memberListSnapshot from "...json"`으로
+ * 빌드 타임에 번들에 박아 넣었기 때문에, 크롤링 후 JSON 파일만 갱신해도
+ * `npm run build`(=Netlify 재배포) 전까지는 화면에 반영되지 않았다. 이제는
+ * 요청마다 fs로 다시 읽으므로 — 로컬 `npm run dev`에서는 JSON 파일을 저장하는
+ * 즉시, 페이지를 새로고침만 해도 "월별 신규 가입" 수치와 성장률 코멘트가
+ * 곧바로 최신 값으로 다시 계산된다 (별도 재시작/재빌드 불필요).
+ *
+ * 단, Netlify처럼 빌드 산출물을 그대로 배포하는 서버리스 환경에서는 이
+ * 파일도 배포 번들에 같이 굳어버리므로, "배포된 사이트"에 새 데이터를
+ * 반영하려면 여전히 JSON을 갱신 → git push → Netlify 재배포가 필요하다.
+ * 이 변경은 그 워크플로를 없애는 게 아니라, 로컬에서 확인할 때 재시작 없이
+ * 바로바로 최신 숫자를 보기 위한 것.
+ */
+function loadSnapshot(): MemberListSnapshot {
+  const raw = fs.readFileSync(SNAPSHOT_PATH, "utf8");
+  return JSON.parse(raw) as MemberListSnapshot;
+}
 
 /**
  * K-UNIV admin의 소속/직위 컬럼 기준 분류.
@@ -15,11 +42,17 @@ export function isStaffMember(m: MemberListEntry): boolean {
   return !!a && a !== "-";
 }
 
-const REAL_MEMBERS: MemberListEntry[] = ALL_MEMBERS.filter((m) => !isStaffMember(m));
+function getAllMembers(): MemberListEntry[] {
+  return loadSnapshot().members;
+}
+
+function getRealMembersSync(): MemberListEntry[] {
+  return getAllMembers().filter((m) => !isStaffMember(m));
+}
 
 /** fetchedAt 기준 최근 30일 (그날 포함) 날짜 문자열 목록, 오래된 순 — 일별 추이 차트용. */
-function last30DaysWindow(): string[] {
-  const asOf = new Date(memberListSnapshot.fetchedAt);
+function last30DaysWindow(fetchedAt: string): string[] {
+  const asOf = new Date(fetchedAt);
   const days: string[] = [];
   for (let i = 29; i >= 0; i--) {
     const d = new Date(asOf);
@@ -34,8 +67,8 @@ function last30DaysWindow(): string[] {
  * 요청으로 도입 — 기존에는 최근 30일 롤링 윈도우로 계산해서 7월+8월 신규
  * 가입이 섞여 보이는 문제가 있었음. 이제 진짜 달력 월 기준으로만 집계한다.
  */
-function currentMonthPrefix(): string {
-  return memberListSnapshot.fetchedAt.slice(0, 7); // "YYYY-MM"
+function currentMonthPrefix(fetchedAt: string): string {
+  return fetchedAt.slice(0, 7); // "YYYY-MM"
 }
 
 /**
@@ -60,13 +93,14 @@ function currentMonthPrefix(): string {
  * (isStaffMember() === true) 계정은 전부 제외한다.
  */
 export async function getUserStats(): Promise<UserStats> {
-  const real = REAL_MEMBERS;
+  const snapshot = loadSnapshot();
+  const real = snapshot.members.filter((m) => !isStaffMember(m));
 
   const totalMembers = real.length;
   const activeMembers = real.filter((m) => m.status === "정상").length;
   const churnedMembers = real.filter((m) => m.status === "탈퇴").length;
 
-  const days = last30DaysWindow();
+  const days = last30DaysWindow(snapshot.fetchedAt);
   const countByDate = new Map<string, number>(days.map((d) => [d, 0]));
   for (const m of real) {
     if (countByDate.has(m.signupDate)) {
@@ -77,7 +111,7 @@ export async function getUserStats(): Promise<UserStats> {
 
   // "이번 달 신규 회원" — 달력 월 기준 (예: 8월이면 8월 가입자만), 30일 롤링
   // 윈도우가 아님. dailySignups(차트용)와는 별개 계산.
-  const monthPrefix = currentMonthPrefix();
+  const monthPrefix = currentMonthPrefix(snapshot.fetchedAt);
   const newMembersThisMonth = real.filter((m) => m.signupDate.startsWith(monthPrefix)).length;
 
   return {
@@ -88,7 +122,7 @@ export async function getUserStats(): Promise<UserStats> {
     dailySignups,
     isLive: true,
     source: "kuniv_admin",
-    fetchedAt: memberListSnapshot.fetchedAt,
+    fetchedAt: snapshot.fetchedAt,
   };
 }
 
@@ -103,17 +137,17 @@ export async function getUserStats(): Promise<UserStats> {
  * Do not add email, passport name, or phone number here.
  */
 export async function getMemberList(): Promise<MemberListEntry[]> {
-  return ALL_MEMBERS;
+  return getAllMembers();
 }
 
 /** 실제 회원(학생)만 — 소속/직위가 "-"인 계정. */
 export async function getRealMembers(): Promise<MemberListEntry[]> {
-  return REAL_MEMBERS;
+  return getRealMembersSync();
 }
 
 /** 학교 관계자/직원 계정만 — 소속/직위 값이 있는 계정. */
 export async function getStaffMembers(): Promise<MemberListEntry[]> {
-  return ALL_MEMBERS.filter(isStaffMember);
+  return getAllMembers().filter(isStaffMember);
 }
 
 /**
@@ -122,20 +156,27 @@ export async function getStaffMembers(): Promise<MemberListEntry[]> {
  * 와 동일한 달력 월 기준으로 계산하므로 카드 숫자와 리스트 인원수가 항상 일치.
  */
 export async function getNewMembersThisMonth(): Promise<MemberListEntry[]> {
-  const monthPrefix = currentMonthPrefix();
-  return REAL_MEMBERS.filter((m) => m.signupDate.startsWith(monthPrefix)).sort((a, b) =>
-    b.signupDate.localeCompare(a.signupDate)
-  );
+  const snapshot = loadSnapshot();
+  const monthPrefix = currentMonthPrefix(snapshot.fetchedAt);
+  return snapshot.members
+    .filter((m) => !isStaffMember(m))
+    .filter((m) => m.signupDate.startsWith(monthPrefix))
+    .sort((a, b) => b.signupDate.localeCompare(a.signupDate));
 }
 
 /**
  * 월별 신규 가입 회원 수 (실제 회원만) — 전체 회원 목록 페이지의
  * "월별 신규 가입" 섹션에서 사용. 최신 월이 먼저 오도록 정렬.
  * 2026-08-03 계정 owner 요청으로 추가.
+ *
+ * 매 호출마다 memberListSnapshot.json을 새로 읽어오므로(loadSnapshot 참고),
+ * 크롤링 후 JSON만 갱신해도 이 값과 members/page.tsx의 성장률 코멘트가
+ * 자동으로 최신 데이터를 반영한다.
  */
 export async function getMemberCountsByMonth(): Promise<MonthlyMemberCount[]> {
+  const real = getRealMembersSync();
   const countByMonth = new Map<string, number>();
-  for (const m of REAL_MEMBERS) {
+  for (const m of real) {
     const month = m.signupDate.slice(0, 7); // "YYYY-MM"
     countByMonth.set(month, (countByMonth.get(month) ?? 0) + 1);
   }
@@ -149,9 +190,9 @@ export async function getMemberCountsByMonth(): Promise<MonthlyMemberCount[]> {
  * 월을 클릭했을 때 보여주는 목록. 최신 가입순 정렬.
  */
 export async function getMembersByMonth(month: string): Promise<MemberListEntry[]> {
-  return REAL_MEMBERS.filter((m) => m.signupDate.startsWith(month)).sort((a, b) =>
-    b.signupDate.localeCompare(a.signupDate)
-  );
+  return getRealMembersSync()
+    .filter((m) => m.signupDate.startsWith(month))
+    .sort((a, b) => b.signupDate.localeCompare(a.signupDate));
 }
 
 /**
@@ -159,7 +200,7 @@ export async function getMembersByMonth(month: string): Promise<MemberListEntry[
  * UserStats.churnedMembers 와 동일 기준(실제 회원 + status === "탈퇴").
  */
 export async function getChurnedMembers(): Promise<MemberListEntry[]> {
-  return REAL_MEMBERS.filter((m) => m.status === "탈퇴").sort((a, b) =>
-    b.signupDate.localeCompare(a.signupDate)
-  );
+  return getRealMembersSync()
+    .filter((m) => m.status === "탈퇴")
+    .sort((a, b) => b.signupDate.localeCompare(a.signupDate));
 }
