@@ -186,6 +186,24 @@ export async function getMemberCountsByMonth(): Promise<MonthlyMemberCount[]> {
 }
 
 /**
+ * 월별 신규 가입 학교 관계자(대학 회원) 수 — getMemberCountsByMonth()와 동일한
+ * 집계를 학교 관계자(isStaffMember() === true) 계정에 대해서 수행한다.
+ * "종합 현황"의 "{월} 신규 회원" 카드를 학생회원/대학 회원으로 나눠 보여주기
+ * 위해 2026-08-22 추가 — 최신 월이 먼저 오도록 정렬 (getMemberCountsByMonth와 동일).
+ */
+export async function getStaffCountsByMonth(): Promise<MonthlyMemberCount[]> {
+  const staff = getAllMembers().filter(isStaffMember);
+  const countByMonth = new Map<string, number>();
+  for (const m of staff) {
+    const month = m.signupDate.slice(0, 7); // "YYYY-MM"
+    countByMonth.set(month, (countByMonth.get(month) ?? 0) + 1);
+  }
+  return Array.from(countByMonth.entries())
+    .map(([month, count]) => ({ month, count }))
+    .sort((a, b) => b.month.localeCompare(a.month));
+}
+
+/**
  * 특정 달(YYYY-MM)에 가입한 실제 회원 목록 — "월별 신규 가입"에서 특정
  * 월을 클릭했을 때 보여주는 목록. 최신 가입순 정렬.
  */
