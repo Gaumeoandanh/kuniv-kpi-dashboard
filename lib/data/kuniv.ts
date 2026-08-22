@@ -222,3 +222,15 @@ export async function getChurnedMembers(): Promise<MemberListEntry[]> {
     .filter((m) => m.status === "탈퇴")
     .sort((a, b) => b.signupDate.localeCompare(a.signupDate));
 }
+
+/**
+ * 특정 달(YYYY-MM)에 가입한 학교 관계자(대학 회원) 목록 — getMembersByMonth()의
+ * 대학 회원 버전. "대학 회원" 카드 또는 "월별 신규 가입"에서 특정 월을
+ * 클릭했을 때 보여주는 목록. 최신 가입순 정렬. 2026-08-22 추가.
+ */
+export async function getStaffMembersByMonth(month: string): Promise<MemberListEntry[]> {
+  return getAllMembers()
+    .filter(isStaffMember)
+    .filter((m) => m.signupDate.startsWith(month))
+    .sort((a, b) => b.signupDate.localeCompare(a.signupDate));
+}
