@@ -8,6 +8,8 @@ import {
   getChurnedMembers,
   getMemberCountsByMonth,
   getMembersByMonth,
+  getStaffCountsByMonth,
+  getStaffMembersByMonth,
 } from "@/lib/data/kuniv";
 import { MemberListEntry } from "@/lib/types";
 
@@ -69,7 +71,7 @@ const BackLink = () => (
   </Link>
 );
 
-/** 이름 · 국가 · 가입일(+상태뱃지) 한 줄짜리 리스트 — 필터 뷰에서 재사용. */
+/** 이름 · 국가 · 가입일(+상태뱃지) 한 줄짜리 리스트 — 실제 회원(학생) 필터 뷰에서 재사용. */
 function MemberRow({ m, index, total }: { m: MemberListEntry; index: number; total: number }) {
   return (
     <div className="flex items-center gap-3 py-2.5">
@@ -86,15 +88,33 @@ function MemberRow({ m, index, total }: { m: MemberListEntry; index: number; tot
   );
 }
 
+/**
+ * 이름 · 국가 · 소속/직위 · 가입일 한 줄짜리 리스트 — 대학 회원(학교 관계자)
+ * 목록에서 재사용. MemberRow와 달리 상태뱃지 대신 소속/직위를 보여준다.
+ * 2026-08-22 추가 — 대학 회원 월별 클릭 조회 기능과 함께 도입.
+ */
+function StaffMemberRow({ m, index, total }: { m: MemberListEntry; index: number; total: number }) {
+  return (
+    <div className="flex items-center gap-3 py-2.5">
+      <span className="w-8 shrink-0 text-right text-xs text-slate-400">{total - index}</span>
+      <span className="text-lg">{m.countryFlag}</span>
+      <span className="flex-1 text-sm text-slate-700">{m.name}</span>
+      <span className="max-w-[40%] shrink-0 truncate text-right text-xs text-slate-400">{m.affiliation}</span>
+      <span className="shrink-0 text-xs text-slate-400">{m.signupDate}</span>
+    </div>
+  );
+}
+
 export default async function MembersPage({
   searchParams,
 }: {
-  searchParams: { filter?: string; month?: string };
+  searchParams: { filter?: string; month?: string; type?: string };
 }) {
   const filter = searchParams?.filter;
   const month = searchParams?.month;
+  const isStaffView = searchParams?.type === "staff";
 
-  // 필터 뷰 — "이번 달 신규 회원" 또는 "탈퇴" 카드에서 넘어온 경우.
+  // 필터 뷰 — "이번 달 신규 회원" 또는 "탈퇴" 카드에서 넘어온 경우 (실제 회원 기준).
   if (filter === "new" || filter === "churned") {
     const members = filter === "new" ? await getNewMembersThisMonth() : await getChurnedMembers();
     const title = filter === "new" ? "이번 달 신규 회원" : "탈퇴 회원";
@@ -127,7 +147,39 @@ export default async function MembersPage({
     );
   }
 
-  // 필터 뷰 — "월별 신규 가입" 섹션에서 특정 월을 클릭한 경우.
+  // 필터 뷰 — "대학 회원" 카드 또는 대학 회원 "월별 신규 가입"에서 특정 월을 클릭한 경우.
+  if (month && isStaffView) {
+    const members = await getStaffMembersByMonth(month);
+    const title = `${formatMonthLabel(month)} 대학 회원 신규 가입`;
+
+    return (
+      <DashboardShell>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard/members?type=staff"
+            className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100"
+          >
+            ← 대학 회원 목록
+          </Link>
+          <h1 className="text-lg font-semibold text-slate-800">{title}</h1>
+        </div>
+
+        <SectionCard title={title} subtitle={`${members.length}명 · 학교 관계자 기준`}>
+          {members.length === 0 ? (
+            <p className="py-4 text-center text-sm text-slate-400">해당하는 계정이 없습니다.</p>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {members.map((m, i) => (
+                <StaffMemberRow key={`${m.name}-${i}`} m={m} index={i} total={members.length} />
+              ))}
+            </div>
+          )}
+        </SectionCard>
+      </DashboardShell>
+    );
+  }
+
+  // 필터 뷰 — "월별 신규 가입" 섹션에서 특정 월을 클릭한 경우 (실제 회원 기준).
   if (month) {
     const members = await getMembersByMonth(month);
     const title = `${formatMonthLabel(month)} 신규 가입`;
@@ -151,6 +203,57 @@ export default async function MembersPage({
             <div className="divide-y divide-slate-100">
               {members.map((m, i) => (
                 <MemberRow key={`${m.name}-${i}`} m={m} index={i} total={members.length} />
+              ))}
+            </div>
+          )}
+        </SectionCard>
+      </DashboardShell>
+    );
+  }
+
+  // 뷰 — 대학 회원(학교 관계자) 전체 목록 + 월별 신규 가입. 2026-08-22 추가 —
+  // "대학 회원" 클릭 시 실제 회원과 동일한 월별 조회 경험을 제공하기 위함.
+  if (isStaffView) {
+    const [staffMembers, monthlyStaffCounts] = await Promise.all([getStaffMembers(), getStaffCountsByMonth()]);
+    const sortedStaff = [...staffMembers].sort((a, b) => b.signupDate.localeCompare(a.signupDate));
+
+    return (
+      <DashboardShell>
+        <div className="flex items-center gap-3">
+          <BackLink />
+          <h1 className="text-lg font-semibold text-slate-800">대학 회원 (학교 관계자)</h1>
+        </div>
+
+        <p className="text-xs text-slate-400">
+          총 {staffMembers.length}명 · K-UNIV admin의 소속/직위 컬럼에 값이 있는 계정 자동 분류
+        </p>
+
+        <SectionCard title="월별 신규 가입" subtitle="대학 회원 기준 · 월 클릭 시 해당 월 명단 보기">
+          {monthlyStaffCounts.length === 0 ? (
+            <p className="py-4 text-center text-sm text-slate-400">아직 데이터가 없습니다.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {monthlyStaffCounts.map(({ month, count }) => (
+                <Link
+                  key={month}
+                  href={`/dashboard/members?type=staff&month=${month}`}
+                  className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-sm text-amber-700 transition hover:bg-amber-100"
+                >
+                  <span>{formatMonthLabel(month)}</span>
+                  <span className="font-medium">{count}명</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </SectionCard>
+
+        <SectionCard title="대학 회원 전체 목록" subtitle={`${sortedStaff.length}명 · 최신 가입순`}>
+          {sortedStaff.length === 0 ? (
+            <p className="py-4 text-center text-sm text-slate-400">해당하는 계정이 없습니다.</p>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {sortedStaff.map((m, i) => (
+                <StaffMemberRow key={`${m.name}-${i}`} m={m} index={i} total={sortedStaff.length} />
               ))}
             </div>
           )}
@@ -259,17 +362,21 @@ export default async function MembersPage({
         </div>
       </SectionCard>
 
-      <SectionCard title="학교 관계자 / 직원 계정" subtitle={`${staffMembers.length}명 · 소속/직위 기준 자동 분류`}>
+      <SectionCard
+        title="학교 관계자 / 직원 계정"
+        subtitle={`${staffMembers.length}명 · 소속/직위 기준 자동 분류`}
+        action={
+          <Link
+            href="/dashboard/members?type=staff"
+            className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100"
+          >
+            월별로 보기 →
+          </Link>
+        }
+      >
         <div className="divide-y divide-slate-100">
           {staffMembers.map((m, i) => (
-            <div key={`${m.name}-${i}`} className="flex items-center gap-3 py-2.5">
-              <span className="w-8 shrink-0 text-right text-xs text-slate-400">{staffMembers.length - i}</span>
-              <span className="text-lg">{m.countryFlag}</span>
-              <span className="flex-1 text-sm text-slate-700">{m.name}</span>
-              <span className="shrink-0 max-w-[45%] truncate text-right text-xs text-slate-400">
-                {m.affiliation}
-              </span>
-            </div>
+            <StaffMemberRow key={`${m.name}-${i}`} m={m} index={i} total={staffMembers.length} />
           ))}
         </div>
       </SectionCard>
