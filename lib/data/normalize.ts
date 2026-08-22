@@ -51,6 +51,20 @@ export function parseSheetDate(raw: unknown): string {
     return new Date(epoch + raw * 86400000).toISOString().slice(0, 10);
   }
   if (typeof raw === "string") {
+    // "YYYY. M. D 오전/오후 H:MM:SS" — the sheet's current locale date-time
+    // format (confirmed 2026-08-22; a formula-linked column pulling from
+    // the "[K-UNIV] Content plan" tab, formatted this way there). This
+    // superseded the older "일요일, 5 7월, 2026" format below — every row
+    // in the live sheet as of 2026-08-22 uses this format, which is why
+    // "이번 달 콘텐츠 발행" was showing 0 (see PeriodComparisonTable.tsx):
+    // publishedDate was falling through to the raw-string return path,
+    // so slice(0, 7) produced a garbage "month" key instead of "YYYY-MM".
+    const dotMatch = raw.match(/^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+    if (dotMatch) {
+      const [, year, month, day] = dotMatch;
+      const d = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+      if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    }
     // Korean locale format, e.g. "일요일, 5 7월, 2026" (weekday, day, month월, year).
     // JS's native Date parser does not understand this, so extract it manually
     // before falling back to a generic parse.
