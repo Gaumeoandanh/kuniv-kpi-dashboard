@@ -9,7 +9,7 @@ import ChannelPublishSection from "@/components/dashboard/ChannelPublishSection"
 import ChannelPerformanceSection from "@/components/dashboard/ChannelPerformanceSection";
 import ChannelEfficiencySection from "@/components/dashboard/ChannelEfficiencySection";
 
-import { getUserStats, getMemberCountsByMonth, getRealMembers } from "@/lib/data/kuniv";
+import { getUserStats, getMemberCountsByMonth, getStaffCountsByMonth, getRealMembers, getStaffMembers } from "@/lib/data/kuniv";
 import { getContentMetrics } from "@/lib/data/sheets";
 import {
   summarizeContent,
@@ -32,12 +32,15 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [userStats, contentRows, monthlyMemberCounts, realMembers] = await Promise.all([
-    getUserStats(),
-    getContentMetrics(),
-    getMemberCountsByMonth(),
-    getRealMembers(),
-  ]);
+  const [userStats, contentRows, monthlyMemberCounts, monthlyStaffCounts, realMembers, staffMembers] =
+    await Promise.all([
+      getUserStats(),
+      getContentMetrics(),
+      getMemberCountsByMonth(),
+      getStaffCountsByMonth(),
+      getRealMembers(),
+      getStaffMembers(),
+    ]);
 
   const contentSummary = summarizeContent(contentRows);
   const dailyViews = dailyViewsFromContent(contentRows);
@@ -51,15 +54,24 @@ export default async function DashboardPage() {
       <ProjectOverviewSection
         userStats={userStats}
         monthlyMemberCounts={monthlyMemberCounts}
+        monthlyStaffCounts={monthlyStaffCounts}
         monthlyContent={monthlyContent}
         channelEff={channelEff}
+        contentSummary={contentSummary}
+        realMembers={realMembers}
       />
 
       <PeriodComparisonTable monthlyMemberCounts={monthlyMemberCounts} monthlyContent={monthlyContent} />
 
       <div className="border-t border-slate-100 pt-2" />
 
-      <UserSection stats={userStats} monthlyCounts={monthlyMemberCounts} realMembers={realMembers} />
+      <UserSection
+        stats={userStats}
+        monthlyCounts={monthlyMemberCounts}
+        monthlyStaffCounts={monthlyStaffCounts}
+        realMembers={realMembers}
+        staffMembers={staffMembers}
+      />
 
       <div className="border-t border-slate-100 pt-2" />
 
