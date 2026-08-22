@@ -6,6 +6,7 @@ import {
   ContentSummary,
   MemberListEntry,
 } from "@/lib/types";
+import Link from "next/link";
 import SummaryCard from "@/components/dashboard/SummaryCard";
 import ReportDownloadButton from "@/components/dashboard/ReportDownloadButton";
 import { CHANNEL_LABEL, percentChange, daysSince, freshnessLevel, currentMonthGoal } from "@/lib/aggregate";
@@ -163,14 +164,21 @@ export default function ProjectOverviewSection({
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 sm:mt-4 sm:gap-4 sm:pt-4">
-            <div>
+            <Link href="/dashboard/members" className="group block">
               <div className="text-[11px] text-slate-500 sm:text-sm">학생회원</div>
-              <div className="text-base font-semibold text-slate-700 sm:text-xl">{thisMonthMembers}</div>
-            </div>
-            <div className="border-l border-slate-100 pl-2 sm:pl-4">
+              <div className="text-base font-semibold text-slate-700 transition group-hover:text-brand-600 sm:text-xl">
+                {thisMonthMembers}
+              </div>
+            </Link>
+            <Link
+              href={`/dashboard/members?type=staff&month=${currentMonthKey}`}
+              className="group block border-l border-slate-100 pl-2 sm:pl-4"
+            >
               <div className="text-[11px] text-slate-500 sm:text-sm">대학 회원</div>
-              <div className="text-base font-semibold text-slate-700 sm:text-xl">{thisMonthStaff}</div>
-            </div>
+              <div className="text-base font-semibold text-slate-700 transition group-hover:text-brand-600 sm:text-xl">
+                {thisMonthStaff}
+              </div>
+            </Link>
           </div>
         </div>
 

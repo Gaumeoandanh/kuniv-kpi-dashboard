@@ -180,63 +180,78 @@ export default function UserSection({
 
       <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {/* 전체 회원 — 2026-08-22부터 학생회원/대학 회원 합산 총계 + 세부 분류
-            표시 (계정 owner 요청). 클릭 시 기존과 동일하게 전체 회원 목록으로 이동. */}
-        <Link
-          href="/dashboard/members"
-          className="block rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm shadow-slate-100 transition hover:border-brand-200 hover:shadow-md sm:rounded-2xl sm:p-5"
-        >
-          <div className="mb-1.5 flex items-center justify-between sm:mb-3">
-            <span className="text-[11px] font-medium text-slate-500 sm:text-sm">전체 회원</span>
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand-50 text-xs text-brand-600 sm:h-8 sm:w-8 sm:rounded-lg sm:text-base">
-              👥
-            </span>
-          </div>
-          <div className="text-lg font-semibold text-slate-800 sm:text-2xl">{totalMembersAll}</div>
+            표시 (계정 owner 요청). 학생회원/대학 회원 각각 클릭하면 해당 회원
+            목록으로 바로 이동 (2026-08-22, 대학 회원 클릭 조회 기능 추가). */}
+        <div className="rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm shadow-slate-100 sm:rounded-2xl sm:p-5">
+          <Link href="/dashboard/members" className="group block">
+            <div className="mb-1.5 flex items-center justify-between sm:mb-3">
+              <span className="text-[11px] font-medium text-slate-500 sm:text-sm">전체 회원</span>
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand-50 text-xs text-brand-600 transition group-hover:bg-brand-100 sm:h-8 sm:w-8 sm:rounded-lg sm:text-base">
+                👥
+              </span>
+            </div>
+            <div className="text-lg font-semibold text-slate-800 transition group-hover:text-brand-600 sm:text-2xl">
+              {totalMembersAll}
+            </div>
+          </Link>
 
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-2 sm:mt-3 sm:pt-3">
-            <div>
+            <Link href="/dashboard/members" className="group block">
               <div className="text-[10px] text-slate-500 sm:text-xs">학생회원</div>
-              <div className="text-sm font-semibold text-slate-700 sm:text-base">{stats.totalMembers}</div>
+              <div className="text-sm font-semibold text-slate-700 transition group-hover:text-brand-600 sm:text-base">
+                {stats.totalMembers}
+              </div>
               <div className="text-[10px] text-slate-400">활성 {stats.activeMembers}명</div>
-            </div>
-            <div className="border-l border-slate-100 pl-2 sm:pl-3">
+            </Link>
+            <Link href="/dashboard/members?type=staff" className="group block border-l border-slate-100 pl-2 sm:pl-3">
               <div className="text-[10px] text-slate-500 sm:text-xs">대학 회원</div>
-              <div className="text-sm font-semibold text-slate-700 sm:text-base">{totalStaff}</div>
+              <div className="text-sm font-semibold text-slate-700 transition group-hover:text-brand-600 sm:text-base">
+                {totalStaff}
+              </div>
               <div className="text-[10px] text-slate-400">활성 {activeStaff}명</div>
-            </div>
+            </Link>
           </div>
-        </Link>
+        </div>
 
         {/* 이번 달 신규 회원 — 위와 동일하게 학생회원/대학 회원 합산 총계 + 세부
-            분류. 전월 대비 증감률도 (학생+대학) 합산 기준으로 계산. */}
-        <Link
-          href="/dashboard/members?filter=new"
-          className="block rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm shadow-slate-100 transition hover:border-brand-200 hover:shadow-md sm:rounded-2xl sm:p-5"
-        >
-          <div className="mb-1.5 flex items-center justify-between sm:mb-3">
-            <span className="text-[11px] font-medium text-slate-500 sm:text-sm">이번 달 신규 회원</span>
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-50 text-xs text-violet-600 sm:h-8 sm:w-8 sm:rounded-lg sm:text-base">
-              🌱
-            </span>
-          </div>
-          <div className="text-lg font-semibold text-slate-800 sm:text-2xl">+{totalNewThisMonth}</div>
-          <div className="mt-0.5 text-[10px] text-slate-400 sm:mt-1 sm:text-xs">
-            {totalMonthTrend !== null
-              ? `${currentMonthLabel(stats.fetchedAt)} 가입 · 전월 대비 ${totalMonthTrend >= 0 ? "+" : ""}${totalMonthTrend.toFixed(1)}%`
-              : `${currentMonthLabel(stats.fetchedAt)} 가입`}
-          </div>
+            분류. 전월 대비 증감률도 (학생+대학) 합산 기준으로 계산. 대학 회원
+            클릭 시 이번 달 신규 가입한 대학 회원 명단으로 바로 이동. */}
+        <div className="rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm shadow-slate-100 sm:rounded-2xl sm:p-5">
+          <Link href="/dashboard/members?filter=new" className="group block">
+            <div className="mb-1.5 flex items-center justify-between sm:mb-3">
+              <span className="text-[11px] font-medium text-slate-500 sm:text-sm">이번 달 신규 회원</span>
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-50 text-xs text-violet-600 transition group-hover:bg-violet-100 sm:h-8 sm:w-8 sm:rounded-lg sm:text-base">
+                🌱
+              </span>
+            </div>
+            <div className="text-lg font-semibold text-slate-800 transition group-hover:text-brand-600 sm:text-2xl">
+              +{totalNewThisMonth}
+            </div>
+            <div className="mt-0.5 text-[10px] text-slate-400 sm:mt-1 sm:text-xs">
+              {totalMonthTrend !== null
+                ? `${currentMonthLabel(stats.fetchedAt)} 가입 · 전월 대비 ${totalMonthTrend >= 0 ? "+" : ""}${totalMonthTrend.toFixed(1)}%`
+                : `${currentMonthLabel(stats.fetchedAt)} 가입`}
+            </div>
+          </Link>
 
           <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-2 sm:mt-3 sm:pt-3">
-            <div>
+            <Link href="/dashboard/members?filter=new" className="group block">
               <div className="text-[10px] text-slate-500 sm:text-xs">학생회원</div>
-              <div className="text-sm font-semibold text-slate-700 sm:text-base">+{stats.newMembersThisMonth}</div>
-            </div>
-            <div className="border-l border-slate-100 pl-2 sm:pl-3">
+              <div className="text-sm font-semibold text-slate-700 transition group-hover:text-brand-600 sm:text-base">
+                +{stats.newMembersThisMonth}
+              </div>
+            </Link>
+            <Link
+              href={`/dashboard/members?type=staff&month=${currentMonthKey}`}
+              className="group block border-l border-slate-100 pl-2 sm:pl-3"
+            >
               <div className="text-[10px] text-slate-500 sm:text-xs">대학 회원</div>
-              <div className="text-sm font-semibold text-slate-700 sm:text-base">+{newStaffThisMonth}</div>
-            </div>
+              <div className="text-sm font-semibold text-slate-700 transition group-hover:text-brand-600 sm:text-base">
+                +{newStaffThisMonth}
+              </div>
+            </Link>
           </div>
-        </Link>
+        </div>
 
         <SummaryCard
           label="탈퇴"
