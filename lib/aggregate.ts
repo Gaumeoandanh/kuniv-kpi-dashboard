@@ -10,6 +10,8 @@ import {
     BestContentMetricKey,
     MonthlyMemberCount,
     MonthlyGoalStatus,
+    MemberListEntry,
+    CountryCount,
 } from "@/lib/types";
 import { sumMetric } from "@/lib/data/normalize";
 
@@ -172,6 +174,20 @@ export function currentMonthGoal(
         actual,
         achievementPercent: previous.count > 0 ? (actual / previous.count) * 100 : null,
     };
+}
+
+/**
+ * 국가별(countryFlag) 회원 수 — 많은 순 정렬. UserSection의 파이 차트와
+ * PDF 보고서(ReportDocument)가 동일한 로직을 공유하도록 2026-08-15 추출.
+ */
+export function countryBreakdown(members: MemberListEntry[]): CountryCount[] {
+    const counts = new Map<string, number>();
+    for (const m of members) {
+        counts.set(m.countryFlag, (counts.get(m.countryFlag) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+        .map(([countryFlag, count]) => ({ countryFlag, count }))
+        .sort((a, b) => b.count - a.count);
 }
 
 /**

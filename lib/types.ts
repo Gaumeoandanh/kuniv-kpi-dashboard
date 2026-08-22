@@ -156,3 +156,9 @@ export interface MonthlyGoalStatus {
   actual: number; // 이번 달 실제 신규 회원 수 (현재까지)
   achievementPercent: number | null; // actual/target*100, target이 0이면 null
 }
+
+/** 국가별(countryFlag) 회원 수 — UserSection 파이 차트 + PDF 보고서에서 공용. */
+export interface CountryCount {
+  countryFlag: string;
+  count: number;
+}
