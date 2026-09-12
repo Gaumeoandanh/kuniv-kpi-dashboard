@@ -1,6 +1,11 @@
 import fs from "fs";
 import path from "path";
-import { UserStats, MemberListEntry, MonthlyMemberCount } from "@/lib/types";
+import {
+  UserStats,
+  MemberListEntry,
+  MonthlyMemberCount,
+  SignupSourceBreakdown,
+} from "@/lib/types";
 
 type MemberListSnapshot = {
   fetchedAt: string;
@@ -233,4 +238,33 @@ export async function getStaffMembersByMonth(month: string): Promise<MemberListE
     .filter(isStaffMember)
     .filter((m) => m.signupDate.startsWith(month))
     .sort((a, b) => b.signupDate.localeCompare(a.signupDate));
+}
+
+/**
+ * 가입 유입경로별 신규 가입 수 — 대시보드 "가입 유입경로" 섹션에서 사용.
+ *
+ * 2026-09-12 추가. 이 섹션은 원래 GA4를 전제로 만들어졌다가 K-UNIV에
+ * GA4가 없어서 숨겨져 있었는데(app/dashboard/page.tsx 주석 참고), admin
+ * 패널 개편으로 회원 목록에 "가입 경로" 컬럼이 노출되면서 회원 단위로
+ * 집계할 수 있게 되었다. GA4의 세션 기반 추정과 달리 이 값은 실제로
+ * 가입까지 완료한 회원에 붙어 있으므로 더 정확하다.
+ *
+ * 다른 KPI와 동일하게 학교 관계자(isStaffMember)는 제외한다 — 관계자
+ * 계정은 대부분 관리자 초대로 생성돼서 "기타 / 초대 가입"에 몰려 있고,
+ * 포함시키면 마케팅 채널 성과가 왜곡된다 (622명 전체 기준 118명 →
+ * 학생만 집계하면 89명).
+ *
+ * 많이 유입된 순으로 정렬. 값은 admin 원본 문자열 그대로 그룹핑하며
+ * enum으로 고정하지 않는다.
+ */
+export async function getSignupSourceBreakdown(): Promise<SignupSourceBreakdown[]> {
+  const real = getRealMembersSync();
+  const countBySource = new Map<string, number>();
+  for (const m of real) {
+    const source = m.acquisitionChannel?.trim() || "미상";
+    countBySource.set(source, (countBySource.get(source) ?? 0) + 1);
+  }
+  return Array.from(countBySource.entries())
+    .map(([source, count]) => ({ source, count }))
+    .sort((a, b) => b.count - a.count);
 }
