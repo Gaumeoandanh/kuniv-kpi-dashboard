@@ -136,6 +136,14 @@ export interface MemberListEntry {
   signupDate: string; // ISO date (YYYY-MM-DD)
   status: "정상" | "탈퇴";
   affiliation: string; // "-" = 소속 없음(실제 회원), 그 외 = 소속/직위 텍스트(관계자)
+  /**
+   * K-UNIV admin 회원 목록의 "가입 경로" 컬럼 원본값 —
+   * "SNS" | "검색" | "유학원 / 광고" | "지인 추천" | "기타 / 초대 가입".
+   * enum으로 고정하지 않음: admin 쪽에서 항목이 추가/변경될 수 있고,
+   * 대시보드는 값을 그대로 그룹핑해서 보여주기만 한다.
+   * 채널 분류값이므로 PII 범위를 넓히지 않는다 (이메일/여권명/전화번호는 계속 제외).
+   */
+  acquisitionChannel: string;
 }
 
 /** 월별 신규 가입자 수 — 전체 회원 목록 페이지의 "월별 신규 가입" 섹션에서 사용. */
