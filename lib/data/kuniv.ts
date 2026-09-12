@@ -42,6 +42,34 @@ export function isStaffMember(m: MemberListEntry): boolean {
   return !!a && a !== "-";
 }
 
+/**
+ * K-UNIV admin 패널 계정 상태 표기 정규화.
+ *
+ * 2026-09-12 확인: admin 패널이 개편되면서 계정 상태 표기가
+ * 정상/탈퇴 → 활성/비활성/탈퇴 로 바뀌었고, 기존 "소속/직위" 컬럼은
+ * 학생 상태(유학준비중/어학원생/학부생/본국대학생)로 대체되었으며
+ * "회원 유형"(유학생/대학 담당자/어학원 담당자/관리자) 컬럼이 신설되었다.
+ *
+ * memberListSnapshot.json은 기존 스키마를 그대로 유지한다 — 즉 크롤링
+ * 단계에서 status 는 정상/탈퇴 로, affiliation 은 학생이면 "-" / 그 외에는
+ * 회원 유형 텍스트로 매핑해서 기록한다. 다만 그 매핑을 깜빡하고 새 표기가
+ * 그대로 들어오면 activeMembers 가 0 으로 집계되는 치명적인 조용한 버그가
+ * 되므로, 읽는 쪽에서도 새 표기를 흡수하도록 한다.
+ */
+function normalizeStatus(status: string | undefined): "정상" | "정지" | "탈퇴" {
+  switch (status?.trim()) {
+    case "탈퇴":
+      return "탈퇴";
+    case "비활성":
+    case "정지":
+      return "정지";
+    case "활성":
+    case "정상":
+    default:
+      return "정상";
+  }
+}
+
 function getAllMembers(): MemberListEntry[] {
   return loadSnapshot().members;
 }
@@ -97,8 +125,8 @@ export async function getUserStats(): Promise<UserStats> {
   const real = snapshot.members.filter((m) => !isStaffMember(m));
 
   const totalMembers = real.length;
-  const activeMembers = real.filter((m) => m.status === "정상").length;
-  const churnedMembers = real.filter((m) => m.status === "탈퇴").length;
+  const activeMembers = real.filter((m) => normalizeStatus(m.status) === "정상").length;
+  const churnedMembers = real.filter((m) => normalizeStatus(m.status) === "탈퇴").length;
 
   const days = last30DaysWindow(snapshot.fetchedAt);
   const countByDate = new Map<string, number>(days.map((d) => [d, 0]));
@@ -219,7 +247,7 @@ export async function getMembersByMonth(month: string): Promise<MemberListEntry[
  */
 export async function getChurnedMembers(): Promise<MemberListEntry[]> {
   return getRealMembersSync()
-    .filter((m) => m.status === "탈퇴")
+    .filter((m) => normalizeStatus(m.status) === "탈퇴")
     .sort((a, b) => b.signupDate.localeCompare(a.signupDate));
 }
 
