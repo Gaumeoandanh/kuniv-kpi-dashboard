@@ -8,8 +8,9 @@ import BestContentTabs from "@/components/dashboard/BestContentTabs";
 import ChannelPublishSection from "@/components/dashboard/ChannelPublishSection";
 import ChannelPerformanceSection from "@/components/dashboard/ChannelPerformanceSection";
 import ChannelEfficiencySection from "@/components/dashboard/ChannelEfficiencySection";
+import SignupSourceSection from "@/components/dashboard/SignupSourceSection";
 
-import { getUserStats, getMemberCountsByMonth, getStaffCountsByMonth, getRealMembers, getStaffMembers } from "@/lib/data/kuniv";
+import { getUserStats, getMemberCountsByMonth, getStaffCountsByMonth, getRealMembers, getStaffMembers, getSignupSourceBreakdown } from "@/lib/data/kuniv";
 import { getContentMetrics } from "@/lib/data/sheets";
 import {
   summarizeContent,
@@ -20,19 +21,22 @@ import {
   channelEfficiency,
 } from "@/lib/aggregate";
 
-// 가입 유입경로 (SignupSourceSection) and 전환 성과 (ConversionSection) are
-// hidden for now — both depended on GA4, which K-UNIV doesn't have, and
-// K-UNIV admin's own "접속 통계" page is currently empty (checked
-// 2026-07-26). The components + lib/data/ga4.ts stub are kept so this is
-// a one-line re-enable once a real traffic source exists — see
-// OPEN_QUESTIONS.md item 3 / DATA_SOURCE_MAP.md.
+// 전환 성과 (ConversionSection) is still hidden — it depended on GA4, which
+// K-UNIV doesn't have, and K-UNIV admin's own "접속 통계" page is still empty.
+// The component + lib/data/ga4.ts stub are kept for a one-line re-enable.
+//
+// 가입 유입경로 (SignupSourceSection) was hidden for the same reason until
+// 2026-09-12: the admin panel redesign exposed a per-member "가입 경로"
+// column, so the breakdown is now derived from memberListSnapshot.json
+// (see getSignupSourceBreakdown) instead of GA4 — and it counts confirmed
+// signups rather than anonymous sessions, which is the better number anyway.
 
 // This page fetches on every request (KPI data should be reasonably fresh).
 // Revisit with a cache/TTL once real API sources are wired up.
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [userStats, contentRows, monthlyMemberCounts, monthlyStaffCounts, realMembers, staffMembers] =
+  const [userStats, contentRows, monthlyMemberCounts, monthlyStaffCounts, realMembers, staffMembers, signupSources] =
     await Promise.all([
       getUserStats(),
       getContentMetrics(),
@@ -40,6 +44,7 @@ export default async function DashboardPage() {
       getStaffCountsByMonth(),
       getRealMembers(),
       getStaffMembers(),
+      getSignupSourceBreakdown(),
     ]);
 
   const contentSummary = summarizeContent(contentRows);
@@ -72,6 +77,8 @@ export default async function DashboardPage() {
         realMembers={realMembers}
         staffMembers={staffMembers}
       />
+
+      <SignupSourceSection data={signupSources} />
 
       <div className="border-t border-slate-100 pt-2" />
 
